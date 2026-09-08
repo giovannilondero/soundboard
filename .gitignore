@@ -1,0 +1,7 @@
+.build/
+bin/
+sounds/
+*.log
+.pid
+MAP.md
+.DS_Store
