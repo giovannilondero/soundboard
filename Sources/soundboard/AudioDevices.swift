@@ -89,6 +89,17 @@ enum AudioDevices {
         if st != noErr { throw SoundboardError("cannot set mute on device \(id) (OSStatus \(st))") }
     }
 
+    struct SavedState { let volume: Float?; let muted: Bool? }
+
+    static func snapshot(_ device: OutputDevice) -> SavedState {
+        SavedState(volume: volume(of: device.id), muted: isMuted(device.id))
+    }
+
+    static func restore(_ device: OutputDevice, _ s: SavedState) {
+        if let v = s.volume { do { try setVolume(device.id, v) } catch { Log.error(error.localizedDescription) } }
+        if let m = s.muted { do { try setMuted(device.id, m) } catch { Log.error(error.localizedDescription) } }
+    }
+
     /// Unmute and set volume, so a "full volume" play actually comes out.
     static func prepare(_ device: OutputDevice, volume: Float) {
         if isMuted(device.id) == true {

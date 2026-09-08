@@ -13,6 +13,7 @@ struct SoundEntry: Codable, Equatable {
 struct Config: Codable {
     var outputDevice: String = "MacBook Pro Speakers"
     var volume: Float = 1.0
+    var restoreVolume: Bool = true
     var stopKey: String = "escape"
     var soundsDir: String = "~/Soundboard/sounds"
     var logFile: String? = "~/Soundboard/soundboard.log"
@@ -24,6 +25,7 @@ struct Config: Codable {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         outputDevice = try c.decodeIfPresent(String.self, forKey: .outputDevice) ?? outputDevice
         volume = try c.decodeIfPresent(Float.self, forKey: .volume) ?? volume
+        restoreVolume = try c.decodeIfPresent(Bool.self, forKey: .restoreVolume) ?? restoreVolume
         stopKey = try c.decodeIfPresent(String.self, forKey: .stopKey) ?? stopKey
         soundsDir = try c.decodeIfPresent(String.self, forKey: .soundsDir) ?? soundsDir
         logFile = try c.decodeIfPresent(String.self, forKey: .logFile) ?? logFile

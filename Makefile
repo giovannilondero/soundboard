@@ -4,7 +4,7 @@ BIN := $(HOME)/Soundboard/bin/soundboard
 
 build:
 	swift build -c release
-	mkdir -p bin && cp .build/release/soundboard $(BIN)
+	mkdir -p bin && rm -f $(BIN) && cp .build/release/soundboard $(BIN) && codesign -s - -f $(BIN)
 
 install: build
 	$(BIN) install

@@ -64,7 +64,9 @@ case "play":
         let player = Player()
         let errs = player.preload(config)
         if let e = errs[key] { die(e) }
+        let saved = AudioDevices.snapshot(device)
         AudioDevices.prepare(device, volume: config.volume)
+        defer { if config.restoreVolume { AudioDevices.restore(device, saved) } }
         print("playing '\(key)' on \(device.name) @ \(Int(config.volume * 100))% (daemon not running, direct mode)")
         try player.playAndWait(key: key, on: device)
     }

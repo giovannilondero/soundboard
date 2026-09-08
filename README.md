@@ -9,7 +9,8 @@ MacBook speakers**, even while headphones are the system output. Spotify, YouTub
 - The daemon opens the `MacBook Pro Speakers` CoreAudio device directly (by name → UID) and binds an
   `AVAudioEngine` to it. The system default output is never touched, so nothing else is rerouted.
 - Before each play it unmutes the speakers and sets *their* volume to `volume` from the config
-  (independent from the headphone volume).
+  (independent from the headphone volume). When playback ends (or on Stop) the previous speaker
+  volume and mute state are restored (`restoreVolume: true`, set to `false` to leave them as is).
 - A new sound interrupts the previous one. Hyper+Esc stops everything.
 - If the speakers device is not found the sound is **not** played (never falls back to headphones); the
   menu bar icon turns into a warning triangle with the reason in the menu.
@@ -43,6 +44,7 @@ Key names: letters, digits, `- = [ ] ; ' , . / \` ` `` `, `space`, `tab`, `retur
 {
   "outputDevice": "MacBook Pro Speakers",
   "volume": 1.0,
+  "restoreVolume": true,
   "stopKey": "escape",
   "soundsDir": "~/Soundboard/sounds",
   "logFile": "~/Soundboard/soundboard.log",

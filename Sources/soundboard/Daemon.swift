@@ -14,12 +14,17 @@ final class Daemon: NSObject, NSApplicationDelegate {
     private var disabled = false
     private var errors: [String] = []
     private var volumeSaveWork: DispatchWorkItem?
+    /// Speaker volume/mute as they were before the current playback burst; restored when it ends.
+    private var savedSpeakerState: (device: OutputDevice, state: AudioDevices.SavedState)?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         IPC.writePid()
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         statusItem.button?.image = icon("speaker.wave.2")
-        player.onPlayingChanged = { [weak self] _ in self?.updateIcon() }
+        player.onPlayingChanged = { [weak self] playing in
+            self?.updateIcon()
+            if !playing { self?.restoreSpeakerState() }
+        }
         IPC.listen { [weak self] cmd, key in self?.handle(command: cmd, key: key) }
         reload()
         watcher = ConfigWatcher(url: Config.url) { [weak self] in
@@ -30,6 +35,7 @@ final class Daemon: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        restoreSpeakerState()
         HotkeyManager.shared.unregisterAll()
         IPC.removePid()
     }
@@ -102,6 +108,9 @@ final class Daemon: NSObject, NSApplicationDelegate {
             setTransientError("Output device \"\(config.outputDevice)\" not found; sound not played")
             return
         }
+        if config.restoreVolume, savedSpeakerState == nil {
+            savedSpeakerState = (device, AudioDevices.snapshot(device))
+        }
         AudioDevices.prepare(device, volume: config.volume)
         do {
             try player.play(key: key, on: device)
@@ -112,6 +121,13 @@ final class Daemon: NSObject, NSApplicationDelegate {
     }
 
     func stop() { player.stop() }
+
+    private func restoreSpeakerState() {
+        guard let saved = savedSpeakerState else { return }
+        savedSpeakerState = nil
+        AudioDevices.restore(saved.device, saved.state)
+        Log.info("restored \(saved.device.name) to \(saved.state.volume.map { "\(Int($0 * 100))%" } ?? "?")\(saved.state.muted == true ? " muted" : "")")
+    }
 
     private func setTransientError(_ msg: String) {
         Log.error(msg)
@@ -228,7 +244,7 @@ final class Daemon: NSObject, NSApplicationDelegate {
     @objc private func volumeChanged(_ sender: NSSlider) {
         config.volume = Float(sender.doubleValue)
         volumeLabel.stringValue = "\(Int(config.volume * 100))%"
-        if let device = AudioDevices.find(named: config.outputDevice) {
+        if !config.restoreVolume, let device = AudioDevices.find(named: config.outputDevice) {
             AudioDevices.prepare(device, volume: config.volume)
         }
         volumeSaveWork?.cancel()
