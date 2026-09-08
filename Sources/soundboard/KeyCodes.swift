@@ -36,12 +36,13 @@ enum KeyCodes {
 
     static func label(_ name: String) -> String {
         switch name.lowercased() {
-        case "escape": return "⎋"
-        case "space": return "␣"
-        case "return": return "↩"
-        case "tab": return "⇥"
-        case "delete": return "⌫"
-        default: return name.uppercased()
+        case "escape": return "Esc"
+        case "space": return "Space"
+        case "return": return "Return"
+        case "tab": return "Tab"
+        case "delete": return "Delete"
+        case "left", "right", "up", "down": return name.capitalized + " arrow"
+        default: return name.count == 1 ? name.uppercased() : name.capitalized
         }
     }
 }
