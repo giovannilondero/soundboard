@@ -11,7 +11,7 @@ MacBook speakers**, even while headphones are the system output. Spotify, YouTub
 - Before each play it unmutes the speakers and sets *their* volume to `volume` from the config
   (independent from the headphone volume). When playback ends (or on Stop) the previous speaker
   volume and mute state are restored (`restoreVolume: true`, set to `false` to leave them as is).
-- A new sound interrupts the previous one. Hyper+Esc stops everything.
+- A new sound interrupts the previous one. Hyper+Space (`stopKey`) stops everything.
 - If the speakers device is not found the sound is **not** played (never falls back to headphones); the
   menu bar icon turns into a warning triangle with the reason in the menu.
 - Global hotkeys use Carbon `RegisterEventHotKey`, no Accessibility permission needed.
@@ -45,7 +45,7 @@ Key names: letters, digits, `- = [ ] ; ' , . / \` ` `` `, `space`, `tab`, `retur
   "outputDevice": "MacBook Pro Speakers",
   "volume": 1.0,
   "restoreVolume": true,
-  "stopKey": "escape",
+  "stopKey": "space",
   "soundsDir": "~/Soundboard/sounds",
   "logFile": "~/Soundboard/soundboard.log",
   "sounds": {
@@ -61,7 +61,7 @@ Key names: letters, digits, `- = [ ] ; ' , . / \` ` `` `, `space`, `tab`, `retur
 
 1. Create a new layer, set its toggle key (Layer Lock) and a distinct LED color.
 2. For every sound key, assign the same letter/number **with ⌃ ⌥ ⇧ ⌘ all enabled**.
-3. Assign Hyper+Esc to any key you like: that is Stop.
+3. Assign Hyper+Space to any key you like: that is Stop.
 4. `soundboard map` prints the table and writes `MAP.md`; the menu bar has a shortcut for it.
 
 ## CLI
@@ -84,3 +84,5 @@ Icons: `speaker.wave.2` idle, `speaker.wave.3` playing, `speaker.slash` disabled
 
 - Headphones must be Bluetooth or USB. With the 3.5 mm jack, macOS may hide the internal speakers device.
 - Key codes assume the US/ABC layout (letters and digits are layout-independent).
+- Do not use `escape` as `stopKey`: macOS registers Hyper+Esc but never delivers it (it belongs to the
+  ⌘⌥Esc Force Quit family). Letters, digits and `space` work.

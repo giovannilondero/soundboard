@@ -14,7 +14,7 @@ struct Config: Codable {
     var outputDevice: String = "MacBook Pro Speakers"
     var volume: Float = 1.0
     var restoreVolume: Bool = true
-    var stopKey: String = "escape"
+    var stopKey: String = "space"
     var soundsDir: String = "~/Soundboard/sounds"
     var logFile: String? = "~/Soundboard/soundboard.log"
     var sounds: [String: SoundEntry] = [:]

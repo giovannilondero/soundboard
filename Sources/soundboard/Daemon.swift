@@ -82,12 +82,17 @@ final class Daemon: NSObject, NSApplicationDelegate {
                 hotkeyKeys[nextID] = key
             } else {
                 errors.append("Hotkey Hyper+\(KeyCodes.label(key)) refused by macOS (taken by another app?)")
+                Log.error("hotkey Hyper+\(KeyCodes.label(key)) refused")
             }
             nextID += 1
         }
         if let code = KeyCodes.code(for: config.stopKey) {
             if !hk.register(keyCode: code, id: stopHotkeyID) {
                 errors.append("Stop hotkey Hyper+\(KeyCodes.label(config.stopKey)) refused by macOS")
+                Log.error("stop hotkey Hyper+\(KeyCodes.label(config.stopKey)) refused")
+            }
+            if config.stopKey.lowercased() == "escape" {
+                errors.append("Hyper+Esc is swallowed by macOS (Force Quit family); use another stopKey, e.g. \"space\"")
             }
         } else {
             errors.append("Unknown stopKey \"\(config.stopKey)\"")
