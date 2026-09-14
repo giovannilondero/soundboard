@@ -16,6 +16,15 @@ MacBook speakers**, even while headphones are the system output. Spotify, YouTub
   menu bar icon turns into a warning triangle with the reason in the menu.
 - Global hotkeys use Carbon `RegisterEventHotKey`, no Accessibility permission needed.
 
+## Requirements
+
+- macOS 14+ (Sonoma or later), Apple Silicon or Intel.
+- Swift toolchain (Xcode or Command Line Tools) to build.
+- `ffmpeg` for `soundboard import` (`brew install ffmpeg`). Not needed to just play sounds.
+- A keyboard able to send Hyper (⌃⌥⇧⌘) + key. A Dygma Defy layer is what this was built for, but
+  anything that emits the same combo (Karabiner-Elements, QMK/ZMK, another programmable keyboard) works.
+- `make install` symlinks into `/opt/homebrew/bin`; on Intel Homebrew adjust the path in the `Makefile`.
+
 ## Install
 
 ```sh
@@ -86,3 +95,11 @@ Icons: `speaker.wave.2` idle, `speaker.wave.3` playing, `speaker.slash` disabled
 - Key codes assume the US/ABC layout (letters and digits are layout-independent).
 - Do not use `escape` as `stopKey`: macOS registers Hyper+Esc but never delivers it (it belongs to the
   ⌘⌥Esc Force Quit family). Letters, digits and `space` work.
+
+## Disclaimer
+
+This is 100% vibecoded. Every line was written by an LLM, prompted by someone who wanted a soundboard
+during calls and nothing more. There was no design phase, no review, no tests, and no interest in code
+quality — if it plays the sound on the right speaker, it shipped. Read the sources at your own risk,
+do not use them as an example of anything, and do not expect support, stability or backwards
+compatibility. It works on my machine, which was the entire requirement.
