@@ -6,3 +6,4 @@ sounds/
 MAP.md
 .DS_Store
 config.json
+dist/

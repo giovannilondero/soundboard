@@ -1,0 +1,100 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to release (e.g. v1.0.0)'
+        required: true
+
+permissions: {}
+
+# Never race two runs over the same tag's assets.
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build and publish
+    permissions:
+      contents: write # creates the release and uploads its assets
+    # macOS 14 is the deployment target: building on a newer runner can link against symbols it lacks.
+    runs-on: macos-14
+
+    steps:
+      - name: Resolve tag
+        id: tag
+        env:
+          TAG: ${{ inputs.tag || github.ref_name }}
+        run: echo "name=$TAG" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.tag.outputs.name }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Build universal binary
+        run: swift build -c release --arch arm64 --arch x86_64
+
+      - name: Sign and verify
+        run: |
+          BIN="$(swift build -c release --arch arm64 --arch x86_64 --show-bin-path)/soundboard"
+          codesign -s - -f "$BIN"
+          codesign --verify --verbose "$BIN"
+          ARCHS="$(lipo -archs "$BIN")"
+          echo "architectures: $ARCHS"
+          [[ "$ARCHS" == *arm64* && "$ARCHS" == *x86_64* ]]
+          "$BIN" > /dev/null
+          echo "BIN=$BIN" >> "$GITHUB_ENV"
+
+      - name: Package
+        id: package
+        env:
+          VERSION: ${{ steps.tag.outputs.name }}
+        run: |
+          STAGE="dist/soundboard-$VERSION"
+          ARCHIVE="soundboard-$VERSION-macos-universal.tar.gz"
+          mkdir -p "$STAGE"
+          cp "$BIN" LICENSE README.md config.example.json "$STAGE/"
+          tar -czf "$ARCHIVE" -C dist "soundboard-$VERSION"
+          shasum -a 256 "$ARCHIVE" > "$ARCHIVE.sha256"
+          echo "archive=$ARCHIVE" >> "$GITHUB_OUTPUT"
+
+      - name: Write release notes
+        env:
+          ARCHIVE: ${{ steps.package.outputs.archive }}
+        run: |
+          DIR="${ARCHIVE%-macos-universal.tar.gz}"
+          {
+            echo 'Universal (arm64 + x86_64) macOS build, ad-hoc signed. Requires macOS 14+.'
+            echo
+            echo '```sh'
+            echo "tar -xzf $ARCHIVE"
+            echo 'mkdir -p ~/Soundboard/bin'
+            echo "mv $DIR/soundboard ~/Soundboard/bin/"
+            echo 'xattr -dr com.apple.quarantine ~/Soundboard/bin/soundboard'
+            echo '~/Soundboard/bin/soundboard install'
+            echo '```'
+            echo
+            echo 'The LaunchAgent records the path of the binary it was installed from, so keep it where you put it.'
+          } > release-notes.md
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.name }}
+          ARCHIVE: ${{ steps.package.outputs.archive }}
+        run: |
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" "$ARCHIVE" "$ARCHIVE.sha256" --clobber
+          else
+            gh release create "$TAG" "$ARCHIVE" "$ARCHIVE.sha256" \
+              --title "$TAG" \
+              --notes-file release-notes.md \
+              --generate-notes
+          fi
