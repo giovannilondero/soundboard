@@ -1,0 +1,12 @@
+{
+  "outputDevice" : "MacBook Pro Speakers",
+  "volume" : 1.0,
+  "restoreVolume" : true,
+  "stopKey" : "space",
+  "soundsDir" : "~/Soundboard/sounds",
+  "logFile" : "~/Soundboard/soundboard.log",
+  "sounds" : {
+    "a" : { "file" : "laugh.wav", "name" : "Laugh" },
+    "s" : { "file" : "applause.wav", "name" : "Applause", "gain" : 0.8 }
+  }
+}

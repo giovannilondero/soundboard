@@ -49,6 +49,9 @@ Key names: letters, digits, `- = [ ] ; ' , . / \` ` `` `, `space`, `tab`, `retur
 
 ## Config (`config.json`)
 
+`config.json` is not tracked: run `soundboard init` to generate a default one, or copy
+`config.example.json` over it.
+
 ```json
 {
   "outputDevice": "MacBook Pro Speakers",

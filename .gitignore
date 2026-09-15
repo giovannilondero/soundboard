@@ -5,3 +5,4 @@ sounds/
 .pid
 MAP.md
 .DS_Store
+config.json
