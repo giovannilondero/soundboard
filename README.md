@@ -106,3 +106,7 @@ during calls and nothing more. There was no design phase, no review, no tests, a
 quality — if it plays the sound on the right speaker, it shipped. Read the sources at your own risk,
 do not use them as an example of anything, and do not expect support, stability or backwards
 compatibility. It works on my machine, which was the entire requirement.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
