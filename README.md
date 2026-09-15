@@ -27,6 +27,24 @@ MacBook speakers**, even while headphones are the system output. Spotify, YouTub
 
 ## Install
 
+### From a release
+
+Every tag publishes a universal (arm64 + x86_64) build, ad-hoc signed, on the
+[releases page](https://github.com/giovannilondero/Soundboard/releases). No Swift toolchain needed.
+
+```sh
+tar -xzf soundboard-<tag>-macos-universal.tar.gz
+mkdir -p ~/Soundboard/bin
+mv soundboard-<tag>/soundboard ~/Soundboard/bin/
+xattr -dr com.apple.quarantine ~/Soundboard/bin/soundboard
+~/Soundboard/bin/soundboard install   # install the LaunchAgent (login autostart)
+~/Soundboard/bin/soundboard doctor    # verify devices, config, sounds
+```
+
+The LaunchAgent records the path of the binary it was installed from, so keep it where you put it.
+
+### From source
+
 ```sh
 make install        # build, copy to bin/, install LaunchAgent, symlink into /opt/homebrew/bin
 soundboard doctor   # verify devices, config, sounds
